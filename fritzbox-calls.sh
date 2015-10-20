@@ -1,11 +1,10 @@
 #!/bin/bash
 
-#Version 1.0
+# Version 1.1
 
 ## Edit this ##
 FRITZBOX="IP_OF_FRITZBOX"
 PASSWORD="ROOT_PASSWORD_OF_FRITZBOX"
-
 
 ## script ##
 
@@ -45,10 +44,16 @@ stats=$(curl --header "Accept: application/xml" \
     --header "Content-Type: text/plain"     \
     "http://$FRITZBOX/fon_num/foncalls_list.lua?sid=$sid" 2>/dev/null)
 
-#Minimize Output 
+#Minimize Output
 stats=$(echo $stats | sed ':a;N;$!ba;s/\n//g')
-stats=$(echo $stats | sed "s/.*Datum//" )
+stats=$(echo $stats | sed "s/.*(hh:mm)//" )
 stats=$(echo $stats | sed "s/btn_form.*$//" )
+
+#Remove Button "add to AddressBook" from FritzBox Output
+# also remove all buttons, anchors and images to get plain text in table
+stats=$(echo $stats | sed -e 's/<\/\?a\s*[^>]*>//g' )
+stats=$(echo $stats | sed -e 's/<\/\?button\s*[^>]*>//g' )
+stats=$(echo $stats | sed -e 's/<\/\?img\s*[^>]*>//g' )
 
 # And output it
 echo $stats
